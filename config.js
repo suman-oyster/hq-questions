@@ -10,6 +10,12 @@ const CONFIG = {
     // App settings
     APP_NAME: 'Oyster HQ Questions',
     REFRESH_INTERVAL: 60000, // 1 minute in milliseconds
+
+    // HQ Team Members - update this list
+    HQ_TEAM: ['Nick', 'Niraj', 'Minal', 'Sarju', 'Anyone'],
+    
+    // Default current user (can be changed in login)
+    DEFAULT_USER: 'Niraj'
     
     // Priority configuration
     PRIORITIES: {
