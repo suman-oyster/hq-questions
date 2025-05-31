@@ -162,7 +162,46 @@ body {
     color: #bdc3c7;
     text-transform: uppercase;
 }
+* User Selection Styles */
+#user-selection-screen .login-container h2 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-size: 24px;
+}
 
+.user-btn {
+    display: block;
+    width: 100%;
+    margin: 12px 0;
+    padding: 15px;
+    border: 2px solid #e1e8ed;
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    color: #2c3e50;
+    transition: all 0.3s ease;
+}
+
+.user-btn:hover {
+    border-color: #3498db;
+    background: #f8f9fa;
+    transform: translateY(-1px);
+}
+
+.user-btn:active {
+    transform: translateY(0);
+}
+
+/* Header user indicator */
+.user-indicator {
+    background: rgba(255,255,255,0.2);
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    margin-right: 10px;
+}
 /* ============================================================================
    FILTER BAR
    ============================================================================ */
