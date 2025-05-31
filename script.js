@@ -471,7 +471,8 @@ class OysterHQApp {
                 body: new URLSearchParams({
                     action: 'submitResponse',
                     questionId: this.currentQuestion.id,
-                    response: responseText
+                    response: responseText,
+                    responderName: this.getCurrentUser() // Add current user
                 })
             });
             
@@ -510,7 +511,8 @@ class OysterHQApp {
                 body: new URLSearchParams({
                     action: 'addThread',
                     questionId: this.currentQuestion.id,
-                    message: messageText
+                    message: messageText,
+                    hqMemberName: this.getCurrentUser() // Add current user
                 })
             });
             
