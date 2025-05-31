@@ -4,6 +4,7 @@ class OysterHQApp {
     constructor() {
         this.currentFilter = 'all';
         this.questions = [];
+        this.hqTeam = ['Nick', 'Anyone']; // Default, will be updated from API
         this.refreshTimer = null;
         this.currentQuestion = null;
         
@@ -74,11 +75,11 @@ class OysterHQApp {
         try {
             this.showLoading(true);
             
-            // Use JSONP to avoid CORS issues completely
             const data = await this.loadWithJsonp(`${CONFIG.API_URL}?action=getQuestions`);
             
             if (data.success) {
                 this.questions = data.questions || [];
+                this.hqTeam = data.team || ['Nick', 'Anyone'];
                 this.cacheData(this.questions);
                 this.renderQuestions();
                 this.updateStats();
@@ -188,19 +189,26 @@ class OysterHQApp {
         const summary = UTILS.getQuestionSummary(question, 120);
         const hasResponse = question.finalResponse && question.finalResponse.trim() !== '';
         
+        // Status styling
+        const statusBadge = hasResponse 
+            ? '<span class="status-badge answered">✅ Answered</span>'
+            : '<span class="status-badge pending">⏳ Pending</span>';
+        
         return `
             <div class="question-card priority-${question.priority?.toLowerCase()}" onclick="app.openQuestion('${question.id}')">
                 <div class="question-header">
                     <div class="question-meta">
-                        <span class="priority-badge ${question.priority?.toLowerCase()}">${priorityInfo.emoji} ${question.priority}</span>
+                        <div class="badges-row">
+                            <span class="priority-badge ${question.priority?.toLowerCase()}">${priorityInfo.emoji} ${question.priority}</span>
+                            ${statusBadge}
+                            <span class="directed-badge">→ ${question.directedTo || 'Anyone'}</span>
+                        </div>
                         <span class="question-time">⏰ ${timeAgo}</span>
                     </div>
                     <div class="question-title">📍 ${question.property || 'Unknown Property'}</div>
                     <div class="question-details">
                         <span>👤 ${question.askedBy || 'Unknown'}</span>
-                        <span>→ ${question.directedTo || 'Anyone'}</span>
                         ${question.fixfloId ? `<span>🎫 ${question.fixfloId}</span>` : ''}
-                        ${hasResponse ? '<span style="color: #27ae60;">✅ Answered</span>' : '<span style="color: #f39c12;">⏳ Pending</span>'}
                     </div>
                 </div>
                 <div class="question-body">
@@ -215,21 +223,43 @@ class OysterHQApp {
     
     filterQuestions(questions) {
         switch (this.currentFilter) {
-            case 'urgent':
-                return questions.filter(q => UTILS.isUrgent(q.priority));
-            case 'new':
+            case 'unanswered':
                 return questions.filter(q => !q.finalResponse || q.finalResponse.trim() === '');
+            case 'answered':
+                return questions.filter(q => q.finalResponse && q.finalResponse.trim() !== '');
+            case 'unanswered-me':
+                return questions.filter(q => 
+                    (!q.finalResponse || q.finalResponse.trim() === '') && 
+                    this.isDirectedToMe(q.directedTo)
+                );
+            case 'answered-me':
+                return questions.filter(q => 
+                    (q.finalResponse && q.finalResponse.trim() !== '') && 
+                    this.isDirectedToMe(q.directedTo)
+                );
             default:
                 return questions;
         }
     }
     
+    // Helper function to check if question is directed to current user
+    isDirectedToMe(directedTo) {
+        // For now, we'll assume any specific person (not "Anyone") is "me"
+        // You can enhance this later with proper user identification
+        return directedTo && directedTo !== 'Anyone';
+    }
+    
     updateStats() {
-        const urgentCount = this.questions.filter(q => UTILS.isUrgent(q.priority) && (!q.finalResponse || q.finalResponse.trim() === '')).length;
-        const totalCount = this.questions.filter(q => !q.finalResponse || q.finalResponse.trim() === '').length;
+        const urgentCount = this.questions.filter(q => 
+            UTILS.isUrgent(q.priority) && (!q.finalResponse || q.finalResponse.trim() === '')
+        ).length;
+        
+        const totalUnanswered = this.questions.filter(q => 
+            !q.finalResponse || q.finalResponse.trim() === ''
+        ).length;
         
         document.getElementById('urgent-count').textContent = urgentCount;
-        document.getElementById('total-count').textContent = totalCount;
+        document.getElementById('total-count').textContent = totalUnanswered;
     }
     
     updateLastUpdated() {
@@ -275,20 +305,29 @@ class OysterHQApp {
         const fixfloUrl = UTILS.getFixfloUrl(question.fixfloId);
         const timeFormatted = new Date(question.timestamp).toLocaleString('en-GB');
         const thread = UTILS.parseThread(question.thread);
+        const hasResponse = question.finalResponse && question.finalResponse.trim() !== '';
         
-        document.getElementById('modal-title').textContent = `${priorityInfo.emoji} ${question.priority} Question`;
+        // Update modal title to include directed to
+        const directedTo = question.directedTo || 'Anyone';
+        document.getElementById('modal-title').textContent = `${priorityInfo.emoji} ${question.priority} → ${directedTo}`;
+        
+        const statusBadge = hasResponse 
+            ? '<span class="status-badge answered">✅ Answered</span>'
+            : '<span class="status-badge pending">⏳ Pending</span>';
         
         const detailsHtml = `
             <div class="question-detail-header">
+                <div class="modal-status-row">
+                    ${statusBadge}
+                    <span class="modal-directed">Directed to: <strong>${directedTo}</strong></span>
+                </div>
+                
                 <div class="detail-meta">
                     <div class="detail-item">
                         <strong>📍 Property:</strong> ${question.property || 'Not specified'}
                     </div>
                     <div class="detail-item">
                         <strong>👤 Asked by:</strong> ${question.askedBy || 'Unknown'}
-                    </div>
-                    <div class="detail-item">
-                        <strong>📧 Directed to:</strong> ${question.directedTo || 'Anyone'}
                     </div>
                     <div class="detail-item">
                         <strong>⏰ Time:</strong> ${timeFormatted}
@@ -310,7 +349,7 @@ class OysterHQApp {
         
         document.getElementById('question-details').innerHTML = detailsHtml;
         
-        // ALWAYS show thread section and render existing messages
+        // Always show thread section
         this.renderThread(thread);
         document.getElementById('thread-section').style.display = 'block';
         
