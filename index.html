@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oyster HQ - Questions</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2c3e50">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen">
+        <div class="login-container">
+            <div class="logo">
+                🏢 <span>Oyster HQ</span>
+            </div>
+            <h1>Questions Portal</h1>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Enter</button>
+            </form>
+            <div id="login-error" class="error-message" style="display: none;">
+                Incorrect password. Please try again.
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Screen -->
+    <div id="app-screen" class="screen" style="display: none;">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1>🏢 Oyster HQ</h1>
+                <div class="header-controls">
+                    <button id="refresh-btn" class="btn-icon" title="Refresh">🔄</button>
+                    <button id="logout-btn" class="btn-icon" title="Logout">🚪</button>
+                </div>
+            </div>
+            <div class="stats-bar">
+                <div class="stat">
+                    <span class="stat-number" id="urgent-count">0</span>
+                    <span class="stat-label">Urgent</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="total-count">0</span>
+                    <span class="stat-label">Total</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="last-updated">--:--</span>
+                    <span class="stat-label">Updated</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter="all">All Questions</button>
+            <button class="filter-btn" data-filter="urgent">Urgent Only</button>
+            <button class="filter-btn" data-filter="new">New</button>
+        </div>
+
+        <!-- Questions List -->
+        <div id="questions-list" class="questions-container">
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Loading questions...</p>
+            </div>
+            
+            <div id="no-questions" class="empty-state" style="display: none;">
+                <div class="empty-icon">✅</div>
+                <h3>All caught up!</h3>
+                <p>No new questions at the moment.</p>
+            </div>
+            
+            <div id="questions-content"></div>
+        </div>
+    </div>
+
+    <!-- Question Detail Modal -->
+    <div id="question-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Question Details</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div id="question-details"></div>
+                
+                <!-- Thread Section -->
+                <div id="thread-section" style="display: none;">
+                    <h3>💬 Conversation</h3>
+                    <div id="thread-content"></div>
+                    
+                    <div class="thread-input">
+                        <textarea id="thread-message" placeholder="Ask for more information..." rows="3"></textarea>
+                        <button id="add-thread-btn" class="btn btn-secondary">Ask Question</button>
+                    </div>
+                </div>
+                
+                <!-- Response Section -->
+                <div id="response-section">
+                    <h3>✍️ Your Response</h3>
+                    <textarea id="response-text" placeholder="Type your detailed response here..." rows="5"></textarea>
+                    <div class="response-actions">
+                        <button id="submit-response-btn" class="btn btn-primary">Submit Response</button>
+                        <button id="cancel-response-btn" class="btn btn-secondary">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Toast -->
+    <div id="error-toast" class="toast error" style="display: none;">
+        <span id="error-message"></span>
+        <button class="toast-close">&times;</button>
+    </div>
+
+    <!-- Success Toast -->
+    <div id="success-toast" class="toast success" style="display: none;">
+        <span id="success-message"></span>
+        <button class="toast-close">&times;</button>
+    </div>
+
+    <!-- Scripts -->
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
