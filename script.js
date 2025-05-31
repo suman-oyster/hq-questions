@@ -292,12 +292,8 @@ class OysterHQApp {
         document.getElementById('question-details').innerHTML = detailsHtml;
         
         // Show/hide thread section
-        if (thread.length > 0) {
-            this.renderThread(thread);
-            document.getElementById('thread-section').style.display = 'block';
-        } else {
-            document.getElementById('thread-section').style.display = 'none';
-        }
+        this.renderThread(thread); // Render existing thread (if any)
+        document.getElementById('thread-section').style.display = 'block'; // Always show thread section
         
         // Pre-fill response if already answered
         if (question.finalResponse) {
