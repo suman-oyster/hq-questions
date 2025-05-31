@@ -15,7 +15,7 @@ const CONFIG = {
     HQ_TEAM: ['Nick', 'Niraj', 'Minal', 'Sarju', 'Anyone'],
     
     // Default current user (can be changed in login)
-    DEFAULT_USER: 'Niraj'
+    DEFAULT_USER: 'Niraj',
     
     // Priority configuration
     PRIORITIES: {
