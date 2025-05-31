@@ -74,15 +74,8 @@ class OysterHQApp {
         try {
             this.showLoading(true);
             
-            const response = await fetch(`${CONFIG.API_URL}?action=getQuestions`, {
-                method: 'GET'
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            const data = await response.json();
+            // Use JSONP to avoid CORS issues completely
+            const data = await this.loadWithJsonp(`${CONFIG.API_URL}?action=getQuestions`);
             
             if (data.success) {
                 this.questions = data.questions || [];
@@ -102,6 +95,32 @@ class OysterHQApp {
         } finally {
             this.showLoading(false);
         }
+    }
+
+    loadWithJsonp(url) {
+        return new Promise((resolve, reject) => {
+            const callbackName = 'jsonp_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+            
+            window[callbackName] = function(data) {
+                resolve(data);
+                if (document.head.contains(script)) {
+                    document.head.removeChild(script);
+                }
+                delete window[callbackName];
+            };
+            
+            const script = document.createElement('script');
+            script.src = url + '&callback=' + callbackName;
+            script.onerror = function() {
+                reject(new Error('Failed to load data'));
+                if (document.head.contains(script)) {
+                    document.head.removeChild(script);
+                }
+                delete window[callbackName];
+            };
+            
+            document.head.appendChild(script);
+        });
     }
     
     loadCachedData() {
