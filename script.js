@@ -120,8 +120,8 @@ class OysterHQApp {
         try {
             const data = await this.loadWithJsonp(`${CONFIG.API_URL}?action=getQuestions`);
             console.log('Team data response:', data);
-            if (data.success && data.hqteam) {
-                this.hqTeam = data.hqteam;
+            if (data.success && data.hqTeam) {
+                this.hqTeam = data.hqTeam;
                 console.log('Loaded HQ team:', this.hqTeam);
             }
         } catch (error) {
