@@ -119,8 +119,8 @@ class OysterHQApp {
     async loadTeamData() {
         try {
             const data = await this.loadWithJsonp(`${CONFIG.API_URL}?action=getQuestions`);
-            if (data.success && data.team) {
-                this.hqTeam = data.team;
+            if (data.success && data.hqteam) {
+                this.hqTeam = data.hqteam;
             }
         } catch (error) {
             console.error('Error loading team data:', error);
