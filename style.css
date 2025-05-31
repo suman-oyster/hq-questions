@@ -1,0 +1,677 @@
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f5f6fa;
+    color: #2c3e50;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* Screen Management */
+.screen {
+    min-height: 100vh;
+}
+
+/* ============================================================================
+   LOGIN SCREEN
+   ============================================================================ */
+
+#login-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+}
+
+.login-container {
+    background: white;
+    padding: 40px 30px;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+}
+
+.logo {
+    font-size: 48px;
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+.logo span {
+    font-size: 24px;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.login-container h1 {
+    color: #2c3e50;
+    margin-bottom: 30px;
+    font-size: 28px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #e1e8ed;
+    border-radius: 10px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+.error-message {
+    background: #e74c3c;
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+/* ============================================================================
+   MAIN APP LAYOUT
+   ============================================================================ */
+
+.app-header {
+    background: #2c3e50;
+    color: white;
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+}
+
+.header-content h1 {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.header-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-icon {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.btn-icon:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.stats-bar {
+    background: #34495e;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 18px;
+    font-weight: bold;
+    color: #3498db;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #bdc3c7;
+    text-transform: uppercase;
+}
+
+/* ============================================================================
+   FILTER BAR
+   ============================================================================ */
+
+.filter-bar {
+    background: white;
+    padding: 15px 20px;
+    display: flex;
+    gap: 10px;
+    border-bottom: 1px solid #e1e8ed;
+    overflow-x: auto;
+}
+
+.filter-btn {
+    background: #ecf0f1;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    color: #2c3e50;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.filter-btn.active {
+    background: #3498db;
+    color: white;
+}
+
+.filter-btn:hover {
+    background: #3498db;
+    color: white;
+}
+
+/* ============================================================================
+   QUESTIONS LIST
+   ============================================================================ */
+
+.questions-container {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.question-card {
+    background: white;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-left: 5px solid #3498db;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+}
+
+.question-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+}
+
+.question-card.priority-p0 { border-left-color: #e74c3c; }
+.question-card.priority-p1 { border-left-color: #f39c12; }
+.question-card.priority-p2 { border-left-color: #3498db; }
+.question-card.priority-p3 { border-left-color: #27ae60; }
+.question-card.priority-p4 { border-left-color: #95a5a6; }
+.question-card.priority-p5 { border-left-color: #bdc3c7; }
+
+.question-header {
+    padding: 15px 20px 10px;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.question-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.priority-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+}
+
+.priority-badge.p0 { background: #e74c3c; }
+.priority-badge.p1 { background: #f39c12; }
+.priority-badge.p2 { background: #3498db; }
+.priority-badge.p3 { background: #27ae60; }
+.priority-badge.p4 { background: #95a5a6; }
+.priority-badge.p5 { background: #bdc3c7; }
+
+.question-time {
+    font-size: 12px;
+    color: #7f8c8d;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.question-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.question-details {
+    font-size: 14px;
+    color: #7f8c8d;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.question-body {
+    padding: 15px 20px;
+}
+
+.question-text {
+    font-size: 14px;
+    color: #2c3e50;
+    line-height: 1.5;
+    margin-bottom: 15px;
+}
+
+.question-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.fixflo-link {
+    background: #3498db;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 15px;
+    text-decoration: none;
+    font-size: 12px;
+    transition: background 0.3s ease;
+}
+
+.fixflo-link:hover {
+    background: #2980b9;
+}
+
+/* ============================================================================
+   BUTTONS
+   ============================================================================ */
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-primary {
+    background: #3498db;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2980b9;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: #95a5a6;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #7f8c8d;
+}
+
+/* ============================================================================
+   MODAL
+   ============================================================================ */
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 15px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #e1e8ed;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+    border-radius: 15px 15px 0 0;
+}
+
+.modal-header h2 {
+    font-size: 18px;
+    color: #2c3e50;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #7f8c8d;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    color: #e74c3c;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.question-detail-header {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e1e8ed;
+}
+
+.detail-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.detail-item strong {
+    color: #2c3e50;
+}
+
+.detail-question {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 15px 0;
+}
+
+/* ============================================================================
+   THREAD/CONVERSATION
+   ============================================================================ */
+
+.thread-message {
+    background: #f8f9fa;
+    padding: 12px 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border-left: 3px solid #3498db;
+}
+
+.thread-meta {
+    font-size: 12px;
+    color: #7f8c8d;
+    margin-bottom: 5px;
+}
+
+.thread-content {
+    font-size: 14px;
+    color: #2c3e50;
+    line-height: 1.4;
+}
+
+.thread-input {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e1e8ed;
+}
+
+.thread-input textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e1e8ed;
+    border-radius: 8px;
+    font-size: 14px;
+    resize: vertical;
+    margin-bottom: 10px;
+}
+
+/* ============================================================================
+   RESPONSE SECTION
+   ============================================================================ */
+
+#response-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e1e8ed;
+}
+
+#response-section h3 {
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+#response-text {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #e1e8ed;
+    border-radius: 10px;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 120px;
+    margin-bottom: 15px;
+}
+
+#response-text:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+.response-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* ============================================================================
+   LOADING AND EMPTY STATES
+   ============================================================================ */
+
+.loading {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #7f8c8d;
+}
+
+.empty-icon {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
+
+/* ============================================================================
+   TOASTS/NOTIFICATIONS
+   ============================================================================ */
+
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 10px;
+    color: white;
+    font-size: 14px;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    max-width: 300px;
+    animation: slideIn 0.3s ease;
+}
+
+.toast.success {
+    background: #27ae60;
+}
+
+.toast.error {
+    background: #e74c3c;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+
+@media (max-width: 768px) {
+    .questions-container {
+        padding: 15px;
+    }
+    
+    .question-card {
+        margin-bottom: 12px;
+    }
+    
+    .modal {
+        padding: 10px;
+    }
+    
+    .modal-content {
+        max-height: 95vh;
+    }
+    
+    .header-content h1 {
+        font-size: 18px;
+    }
+    
+    .detail-meta {
+        grid-template-columns: 1fr;
+    }
+    
+    .response-actions {
+        flex-direction: column;
+    }
+    
+    .filter-bar {
+        padding: 10px 15px;
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-container {
+        padding: 30px 20px;
+    }
+    
+    .question-header,
+    .question-body {
+        padding: 12px 15px;
+    }
+    
+    .modal-body {
+        padding: 15px;
+    }
+    
+    .toast {
+        right: 10px;
+        top: 10px;
+        max-width: calc(100vw - 20px);
+    }
+}
