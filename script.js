@@ -1,10 +1,9 @@
-// Oyster HQ Questions Mobile Interface - Main JavaScript
-
 class OysterHQApp {
     constructor() {
         this.currentFilter = 'all';
         this.questions = [];
-        this.hqTeam = ['Nick', 'Anyone']; // Default, will be updated from API
+        this.hqTeam = ['Nick', 'Minal', 'Sarju', 'Anyone'];
+        this.currentUser = null;
         this.refreshTimer = null;
         this.currentQuestion = null;
         
@@ -18,15 +17,19 @@ class OysterHQApp {
     }
     
     // ========================================================================
-    // AUTHENTICATION
+    // AUTHENTICATION & USER SELECTION
     // ========================================================================
     
     checkLoginStatus() {
         const isLoggedIn = localStorage.getItem(CONFIG.STORAGE_KEYS.LOGIN_STATUS) === 'true';
+        const savedUser = localStorage.getItem('oyster_current_user');
         
-        if (isLoggedIn) {
+        if (isLoggedIn && savedUser) {
+            this.currentUser = savedUser;
             this.showApp();
             this.loadQuestions();
+        } else if (isLoggedIn && !savedUser) {
+            this.showUserSelection();
         } else {
             this.showLogin();
         }
@@ -34,19 +37,64 @@ class OysterHQApp {
     
     showLogin() {
         document.getElementById('login-screen').style.display = 'flex';
+        document.getElementById('user-selection-screen').style.display = 'none';
         document.getElementById('app-screen').style.display = 'none';
         document.getElementById('password').focus();
     }
     
+    showUserSelection() {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('user-selection-screen').style.display = 'flex';
+        document.getElementById('app-screen').style.display = 'none';
+        
+        // Populate user buttons
+        this.renderUserButtons();
+    }
+    
     showApp() {
         document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('user-selection-screen').style.display = 'none';
         document.getElementById('app-screen').style.display = 'block';
+        
+        // Update header with current user
+        this.updateUserHeader();
+    }
+    
+    renderUserButtons() {
+        const container = document.getElementById('user-buttons');
+        const availableUsers = this.hqTeam.filter(name => name !== 'Anyone');
+        
+        container.innerHTML = availableUsers.map(name => 
+            `<button class="user-btn" onclick="app.setCurrentUser('${name}')">${name}</button>`
+        ).join('');
+    }
+    
+    setCurrentUser(userName) {
+        this.currentUser = userName;
+        localStorage.setItem('oyster_current_user', userName);
+        localStorage.setItem(CONFIG.STORAGE_KEYS.LOGIN_STATUS, 'true');
+        this.showApp();
+        this.loadQuestions();
+        UTILS.showToast(`Welcome, ${userName}!`);
+    }
+    
+    getCurrentUser() {
+        return this.currentUser || localStorage.getItem('oyster_current_user') || 'HQ Team';
+    }
+    
+    updateUserHeader() {
+        const currentUser = this.getCurrentUser();
+        const headerContent = document.querySelector('.header-content h1');
+        headerContent.innerHTML = `🏢 Oyster HQ <span class="user-indicator">${currentUser}</span>`;
     }
     
     handleLogin(password) {
         if (password === CONFIG.PASSWORD) {
-            // Show user selection after successful login
-            this.showUserSelection();
+            // First load team data to show proper user selection
+            this.loadTeamData().then(() => {
+                this.showUserSelection();
+            });
+            document.getElementById('login-error').style.display = 'none';
             return true;
         } else {
             document.getElementById('login-error').style.display = 'block';
@@ -55,41 +103,29 @@ class OysterHQApp {
             return false;
         }
     }
-
-    showUserSelection() {
-        // Create user selection modal
-        const userModal = `
-            <div id="user-selection-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999;">
-                <div style="background: white; padding: 30px; border-radius: 15px; text-align: center; max-width: 300px;">
-                    <h3>Who are you?</h3>
-                    <p style="color: #7f8c8d; margin-bottom: 20px;">Select your name to personalize the experience</p>
-                    ${this.hqTeam.filter(name => name !== 'Anyone').map(name => 
-                        `<button onclick="app.setCurrentUser('${name}')" style="display: block; width: 100%; margin: 10px 0; padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer;">${name}</button>`
-                    ).join('')}
-                </div>
-            </div>
-        `;
-        
-        document.body.insertAdjacentHTML('beforeend', userModal);
-    }
     
-    setCurrentUser(userName) {
-        localStorage.setItem('oyster_current_user', userName);
-        document.getElementById('user-selection-modal').remove();
-        localStorage.setItem(CONFIG.STORAGE_KEYS.LOGIN_STATUS, 'true');
-        this.showApp();
-        this.loadQuestions();
-    }
-    
-    getCurrentUser() {
-        return localStorage.getItem('oyster_current_user') || CONFIG.DEFAULT_USER;
-    }
     handleLogout() {
         localStorage.removeItem(CONFIG.STORAGE_KEYS.LOGIN_STATUS);
         localStorage.removeItem(CONFIG.STORAGE_KEYS.CACHED_DATA);
+        localStorage.removeItem('oyster_current_user');
+        this.currentUser = null;
         this.showLogin();
         if (this.refreshTimer) {
             clearInterval(this.refreshTimer);
+        }
+    }
+    
+    // Load team data for user selection
+    async loadTeamData() {
+        try {
+            const data = await this.loadWithJsonp(`${CONFIG.API_URL}?action=getQuestions`);
+            if (data.success && data.team) {
+                this.hqTeam = data.team;
+            }
+        } catch (error) {
+            console.error('Error loading team data:', error);
+            // Use default team if API fails
+            this.hqTeam = ['Nick', 'Minal', 'Sarju', 'Anyone'];
         }
     }
     
@@ -105,7 +141,7 @@ class OysterHQApp {
             
             if (data.success) {
                 this.questions = data.questions || [];
-                this.hqTeam = data.team || ['Nick', 'Anyone'];
+                this.hqTeam = data.team || this.hqTeam;
                 this.cacheData(this.questions);
                 this.renderQuestions();
                 this.updateStats();
@@ -123,7 +159,27 @@ class OysterHQApp {
             this.showLoading(false);
         }
     }
-
+    
+    loadCachedData() {
+        const cached = localStorage.getItem(CONFIG.STORAGE_KEYS.CACHED_DATA);
+        if (cached) {
+            try {
+                this.questions = JSON.parse(cached);
+                this.renderQuestions();
+                this.updateStats();
+            } catch (error) {
+                console.error('Error loading cached data:', error);
+                this.questions = [];
+                this.renderQuestions();
+            }
+        }
+    }
+    
+    cacheData(questions) {
+        localStorage.setItem(CONFIG.STORAGE_KEYS.CACHED_DATA, JSON.stringify(questions));
+        localStorage.setItem(CONFIG.STORAGE_KEYS.LAST_UPDATE, new Date().toISOString());
+    }
+    
     loadWithJsonp(url) {
         return new Promise((resolve, reject) => {
             const callbackName = 'jsonp_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
@@ -150,24 +206,36 @@ class OysterHQApp {
         });
     }
     
-    loadCachedData() {
-        const cached = localStorage.getItem(CONFIG.STORAGE_KEYS.CACHED_DATA);
-        if (cached) {
-            try {
-                this.questions = JSON.parse(cached);
-                this.renderQuestions();
-                this.updateStats();
-            } catch (error) {
-                console.error('Error loading cached data:', error);
-                this.questions = [];
-                this.renderQuestions();
-            }
+    // ========================================================================
+    // FILTERING
+    // ========================================================================
+    
+    filterQuestions(questions) {
+        const currentUser = this.getCurrentUser();
+        
+        switch (this.currentFilter) {
+            case 'unanswered':
+                return questions.filter(q => !q.finalResponse || q.finalResponse.trim() === '');
+            case 'answered':
+                return questions.filter(q => q.finalResponse && q.finalResponse.trim() !== '');
+            case 'unanswered-me':
+                return questions.filter(q => 
+                    (!q.finalResponse || q.finalResponse.trim() === '') && 
+                    this.isDirectedToMe(q.directedTo)
+                );
+            case 'answered-me':
+                return questions.filter(q => 
+                    (q.finalResponse && q.finalResponse.trim() !== '') && 
+                    this.isDirectedToMe(q.directedTo)
+                );
+            default:
+                return questions;
         }
     }
     
-    cacheData(questions) {
-        localStorage.setItem(CONFIG.STORAGE_KEYS.CACHED_DATA, JSON.stringify(questions));
-        localStorage.setItem(CONFIG.STORAGE_KEYS.LAST_UPDATE, new Date().toISOString());
+    isDirectedToMe(directedTo) {
+        const currentUser = this.getCurrentUser();
+        return directedTo === currentUser;
     }
     
     // ========================================================================
@@ -178,7 +246,6 @@ class OysterHQApp {
         const container = document.getElementById('questions-content');
         const noQuestionsEl = document.getElementById('no-questions');
         
-        // Filter questions
         const filteredQuestions = this.filterQuestions(this.questions);
         
         if (filteredQuestions.length === 0) {
@@ -191,7 +258,6 @@ class OysterHQApp {
         
         // Sort by priority and timestamp
         filteredQuestions.sort((a, b) => {
-            // Priority sort (P0 first, P5 last)
             const priorityA = parseInt(a.priority?.replace('P', '') || '3');
             const priorityB = parseInt(b.priority?.replace('P', '') || '3');
             
@@ -199,7 +265,6 @@ class OysterHQApp {
                 return priorityA - priorityB;
             }
             
-            // Then by timestamp (newest first)
             const timeA = new Date(a.timestamp || 0);
             const timeB = new Date(b.timestamp || 0);
             return timeB - timeA;
@@ -215,7 +280,6 @@ class OysterHQApp {
         const summary = UTILS.getQuestionSummary(question, 120);
         const hasResponse = question.finalResponse && question.finalResponse.trim() !== '';
         
-        // Status styling
         const statusBadge = hasResponse 
             ? '<span class="status-badge answered">✅ Answered</span>'
             : '<span class="status-badge pending">⏳ Pending</span>';
@@ -247,34 +311,8 @@ class OysterHQApp {
         `;
     }
     
-    filterQuestions(questions) {
-        switch (this.currentFilter) {
-            case 'unanswered':
-                return questions.filter(q => !q.finalResponse || q.finalResponse.trim() === '');
-            case 'answered':
-                return questions.filter(q => q.finalResponse && q.finalResponse.trim() !== '');
-            case 'unanswered-me':
-                return questions.filter(q => 
-                    (!q.finalResponse || q.finalResponse.trim() === '') && 
-                    this.isDirectedToMe(q.directedTo)
-                );
-            case 'answered-me':
-                return questions.filter(q => 
-                    (q.finalResponse && q.finalResponse.trim() !== '') && 
-                    this.isDirectedToMe(q.directedTo)
-                );
-            default:
-                return questions;
-        }
-    }
-    
-    // Helper function to check if question is directed to current user
-        isDirectedToMe(directedTo) {
-        const currentUser = this.getCurrentUser();
-        return directedTo === currentUser;
-    }
-    
     updateStats() {
+        const currentUser = this.getCurrentUser();
         const urgentCount = this.questions.filter(q => 
             UTILS.isUrgent(q.priority) && (!q.finalResponse || q.finalResponse.trim() === '')
         ).length;
@@ -332,7 +370,6 @@ class OysterHQApp {
         const thread = UTILS.parseThread(question.thread);
         const hasResponse = question.finalResponse && question.finalResponse.trim() !== '';
         
-        // Update modal title to include directed to
         const directedTo = question.directedTo || 'Anyone';
         document.getElementById('modal-title').textContent = `${priorityInfo.emoji} ${question.priority} → ${directedTo}`;
         
@@ -374,11 +411,9 @@ class OysterHQApp {
         
         document.getElementById('question-details').innerHTML = detailsHtml;
         
-        // Always show thread section
         this.renderThread(thread);
         document.getElementById('thread-section').style.display = 'block';
         
-        // Pre-fill response if already answered
         if (question.finalResponse) {
             document.getElementById('response-text').value = question.finalResponse;
         } else {
@@ -393,7 +428,7 @@ class OysterHQApp {
         }
         
         const threadHtml = messages.map(msg => {
-            const isHQ = msg.author.includes('HQ') || msg.author.includes('Nick') || msg.author.includes('Manager');
+            const isHQ = msg.author.includes('HQ') || this.hqTeam.some(name => name !== 'Anyone' && msg.author.includes(name));
             const messageClass = isHQ ? 'hq-message' : 'team-message';
             const metaClass = isHQ ? 'hq' : 'team';
             
@@ -445,7 +480,7 @@ class OysterHQApp {
             if (data.success) {
                 UTILS.showToast('Response submitted successfully!');
                 this.closeModal();
-                this.loadQuestions(); // Refresh data
+                this.loadQuestions();
             } else {
                 throw new Error(data.error || 'Failed to submit response');
             }
@@ -484,8 +519,7 @@ class OysterHQApp {
             if (data.success) {
                 UTILS.showToast('Message added to thread');
                 document.getElementById('thread-message').value = '';
-                this.loadQuestions(); // Refresh data
-                // Re-render current question to show new thread
+                this.loadQuestions();
                 const updatedQuestion = this.questions.find(q => q.id === this.currentQuestion.id);
                 if (updatedQuestion) {
                     this.renderQuestionDetail(updatedQuestion);
@@ -526,7 +560,6 @@ class OysterHQApp {
             btn.addEventListener('click', (e) => {
                 this.currentFilter = e.target.dataset.filter;
                 
-                // Update active state
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
                 
