@@ -486,6 +486,26 @@ body {
     margin-bottom: 10px;
 }
 
+.thread-message.hq-message {
+    background: #e8f4fd;
+    border-left-color: #3498db;
+}
+
+.thread-message.team-message {
+    background: #f0f9ff;
+    border-left-color: #27ae60;
+}
+
+.thread-meta.hq {
+    color: #3498db;
+    font-weight: 600;
+}
+
+.thread-meta.team {
+    color: #27ae60;
+    font-weight: 600;
+}
+
 /* ============================================================================
    RESPONSE SECTION
    ============================================================================ */
