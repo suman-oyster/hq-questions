@@ -28,7 +28,7 @@ const CONFIG = {
     },
     
     // Fixflo integration
-    FIXFLO_BASE_URL: 'https://oyster.fixflo.com/Dashboard/Issue/',
+    FIXFLO_BASE_URL: 'https://oyster.fixflo.com/Dashboard/Home/#/Issue/_Detail?id=',
     
     // Features toggles
     FEATURES: {
@@ -86,8 +86,9 @@ const UTILS = {
     // Generate Fixflo URL
     getFixfloUrl(fixfloId) {
         if (!fixfloId) return null;
-        const cleanId = fixfloId.toString().replace(/[^0-9]/g, '');
-        return cleanId ? `${CONFIG.FIXFLO_BASE_URL}${cleanId}` : null;
+        // Handle both old format (numbers) and new format (IS...)
+        const cleanId = fixfloId.toString().trim();
+        return `${CONFIG.FIXFLO_BASE_URL}${cleanId}`;
     },
     
     // Validate question data
