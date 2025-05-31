@@ -2,7 +2,7 @@
 
 const CONFIG = {
     // Google Apps Script Web App URL (you'll need to update this)
-    API_URL: 'https://script.google.com/macros/s/AKfycbxdSyg3nqrSiib_Tf2AcGY29PMXwYKKmmirX9IfTRtk-snID-Kk9NHAkg46DSALDLfz/exec',
+    API_URL: 'https://script.google.com/macros/s/AKfycby8C3u4XQGVlK6PFqNUI5_8JfrgFfdPgGvqHyBLZJ8gZmcWGgDfWeIBjlGkPC4xu2Uu/exec',
     
     // Simple password (you can change this)
     PASSWORD: 'oysterHQ2025',
