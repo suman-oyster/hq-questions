@@ -304,12 +304,23 @@ class OysterHQApp {
     }
     
     renderThread(messages) {
-        const threadHtml = messages.map(msg => `
-            <div class="thread-message">
-                <div class="thread-meta">${msg.timestamp} - ${msg.author}</div>
-                <div class="thread-content">${msg.content}</div>
-            </div>
-        `).join('');
+        if (messages.length === 0) {
+            document.getElementById('thread-content').innerHTML = '<p style="color: #7f8c8d; font-style: italic;">No conversation yet.</p>';
+            return;
+        }
+        
+        const threadHtml = messages.map(msg => {
+            const isHQ = msg.author.includes('HQ') || msg.author.includes('Nick') || msg.author.includes('Manager');
+            const messageClass = isHQ ? 'hq-message' : 'team-message';
+            const metaClass = isHQ ? 'hq' : 'team';
+            
+            return `
+                <div class="thread-message ${messageClass}">
+                    <div class="thread-meta ${metaClass}">${msg.timestamp} - ${msg.author}</div>
+                    <div class="thread-content">${msg.content}</div>
+                </div>
+            `;
+        }).join('');
         
         document.getElementById('thread-content').innerHTML = threadHtml;
     }
