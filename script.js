@@ -291,9 +291,9 @@ class OysterHQApp {
         
         document.getElementById('question-details').innerHTML = detailsHtml;
         
-        // Show/hide thread section
-        this.renderThread(thread); // Render existing thread (if any)
-        document.getElementById('thread-section').style.display = 'block'; // Always show thread section
+        // ALWAYS show thread section and render existing messages
+        this.renderThread(thread);
+        document.getElementById('thread-section').style.display = 'block';
         
         // Pre-fill response if already answered
         if (question.finalResponse) {
