@@ -45,10 +45,8 @@ class OysterHQApp {
     
     handleLogin(password) {
         if (password === CONFIG.PASSWORD) {
-            localStorage.setItem(CONFIG.STORAGE_KEYS.LOGIN_STATUS, 'true');
-            this.showApp();
-            this.loadQuestions();
-            document.getElementById('login-error').style.display = 'none';
+            // Show user selection after successful login
+            this.showUserSelection();
             return true;
         } else {
             document.getElementById('login-error').style.display = 'block';
@@ -57,7 +55,35 @@ class OysterHQApp {
             return false;
         }
     }
+
+    showUserSelection() {
+        // Create user selection modal
+        const userModal = `
+            <div id="user-selection-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+                <div style="background: white; padding: 30px; border-radius: 15px; text-align: center; max-width: 300px;">
+                    <h3>Who are you?</h3>
+                    <p style="color: #7f8c8d; margin-bottom: 20px;">Select your name to personalize the experience</p>
+                    ${this.hqTeam.filter(name => name !== 'Anyone').map(name => 
+                        `<button onclick="app.setCurrentUser('${name}')" style="display: block; width: 100%; margin: 10px 0; padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer;">${name}</button>`
+                    ).join('')}
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', userModal);
+    }
     
+    setCurrentUser(userName) {
+        localStorage.setItem('oyster_current_user', userName);
+        document.getElementById('user-selection-modal').remove();
+        localStorage.setItem(CONFIG.STORAGE_KEYS.LOGIN_STATUS, 'true');
+        this.showApp();
+        this.loadQuestions();
+    }
+    
+    getCurrentUser() {
+        return localStorage.getItem('oyster_current_user') || CONFIG.DEFAULT_USER;
+    }
     handleLogout() {
         localStorage.removeItem(CONFIG.STORAGE_KEYS.LOGIN_STATUS);
         localStorage.removeItem(CONFIG.STORAGE_KEYS.CACHED_DATA);
@@ -243,10 +269,9 @@ class OysterHQApp {
     }
     
     // Helper function to check if question is directed to current user
-    isDirectedToMe(directedTo) {
-        // For now, we'll assume any specific person (not "Anyone") is "me"
-        // You can enhance this later with proper user identification
-        return directedTo && directedTo !== 'Anyone';
+        isDirectedToMe(directedTo) {
+        const currentUser = this.getCurrentUser();
+        return directedTo === currentUser;
     }
     
     updateStats() {
