@@ -2,7 +2,7 @@ class OysterHQApp {
     constructor() {
         this.currentFilter = 'all';
         this.questions = [];
-        this.hqTeam = ['Nick', 'Minal', 'Sarju', 'Anyone'];
+        this.hqTeam = ['Nick', 'Niraj', 'Minal', 'Sarju', 'Anyone'];
         this.currentUser = null;
         this.refreshTimer = null;
         this.currentQuestion = null;
