@@ -62,7 +62,7 @@ class OysterHQApp {
     
     renderUserButtons() {
         const container = document.getElementById('user-buttons');
-        const availableUsers = this.hqTeam.filter(name => name !== 'Anyone');
+        const availableUsers = this.agents || this.hqTeam.filter(name => name !== 'Anyone');
         
         container.innerHTML = availableUsers.map(name => 
             `<button class="user-btn" onclick="app.setCurrentUser('${name}')">${name}</button>`
