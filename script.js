@@ -70,12 +70,31 @@ class OysterHQApp {
     }
     
     setCurrentUser(userName) {
-        this.currentUser = userName;
-        localStorage.setItem('oyster_current_user', userName);
-        localStorage.setItem(CONFIG.STORAGE_KEYS.LOGIN_STATUS, 'true');
-        this.showApp();
-        this.loadQuestions();
-        UTILS.showToast(`Welcome, ${userName}!`);
+        // Find the clicked button and show loading state
+        const clickedBtn = event.target;
+        const allBtns = document.querySelectorAll('.user-btn');
+        
+        // Disable all buttons and show loading on clicked one
+        allBtns.forEach(btn => {
+            btn.disabled = true;
+            if (btn === clickedBtn) {
+                this.setButtonLoading(btn, true, 'Loading...');
+            } else {
+                btn.style.opacity = '0.5';
+            }
+        });
+        
+        UTILS.showToast(`Setting up ${userName}'s workspace...`, 'info');
+        
+        // Small delay to show the loading state, then proceed
+        setTimeout(() => {
+            this.currentUser = userName;
+            localStorage.setItem(CONFIG.STORAGE_KEYS.CURRENT_USER, userName);
+            localStorage.setItem(CONFIG.STORAGE_KEYS.LOGIN_STATUS, 'true');
+            this.showApp();
+            this.loadData(); // This will show "Loading data..." 
+            UTILS.showToast(`Welcome, ${userName}!`);
+        }, 500);
     }
     
     getCurrentUser() {
@@ -90,17 +109,25 @@ class OysterHQApp {
     
     handleLogin(password) {
         const loginBtn = document.querySelector('#login-form button[type="submit"]');
+        const loginForm = document.getElementById('login-form');
+        
         this.setButtonLoading(loginBtn, true, 'Checking...');
+        this.setFormLoading(loginForm, true);
+        UTILS.showToast('Verifying password...', 'info');
         
         if (password === CONFIG.PASSWORD) {
+            UTILS.showToast('Loading team data...', 'info');
             this.loadTeamData().then(() => {
                 this.setButtonLoading(loginBtn, false);
+                this.setFormLoading(loginForm, false);
                 this.showUserSelection();
+                UTILS.showToast('Welcome! Please select your name.');
             });
             document.getElementById('login-error').style.display = 'none';
             return true;
         } else {
             this.setButtonLoading(loginBtn, false);
+            this.setFormLoading(loginForm, false);
             document.getElementById('login-error').style.display = 'block';
             document.getElementById('password').value = '';
             document.getElementById('password').focus();
@@ -122,15 +149,20 @@ class OysterHQApp {
     // Load team data for user selection
     async loadTeamData() {
         try {
+            UTILS.showToast('Loading team information...', 'info');
             const data = await this.loadWithJsonp(`${CONFIG.API_URL}?action=getQuestions`);
             console.log('Team data response:', data);
-            if (data.success && data.hqTeam) {
+            
+            if (data.success && data.hqTeam) {  // For HQ portal
                 this.hqTeam = data.hqTeam;
                 console.log('Loaded HQ team:', this.hqTeam);
+            } else if (data.success && data.team) {  // Fallback
+                this.hqTeam = data.team;
+                console.log('Loaded team (fallback):', this.hqTeam);
             }
         } catch (error) {
             console.error('Error loading team data:', error);
-            // Use default team if API fails
+            UTILS.showToast('Could not load team data, using defaults', 'error');
             this.hqTeam = ['Nick', 'Minal', 'Sarju', 'Anyone'];
         }
     }
