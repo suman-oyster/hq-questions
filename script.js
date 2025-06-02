@@ -89,14 +89,18 @@ class OysterHQApp {
     }
     
     handleLogin(password) {
+        const loginBtn = document.querySelector('#login-form button[type="submit"]');
+        this.setButtonLoading(loginBtn, true, 'Checking...');
+        
         if (password === CONFIG.PASSWORD) {
-            // First load team data to show proper user selection
             this.loadTeamData().then(() => {
+                this.setButtonLoading(loginBtn, false);
                 this.showUserSelection();
             });
             document.getElementById('login-error').style.display = 'none';
             return true;
         } else {
+            this.setButtonLoading(loginBtn, false);
             document.getElementById('login-error').style.display = 'block';
             document.getElementById('password').value = '';
             document.getElementById('password').focus();
@@ -130,20 +134,50 @@ class OysterHQApp {
             this.hqTeam = ['Nick', 'Minal', 'Sarju', 'Anyone'];
         }
     }
+
+    setButtonLoading(buttonElement, loading, originalText = null) {
+        if (loading) {
+            if (!buttonElement.dataset.originalText) {
+                buttonElement.dataset.originalText = buttonElement.textContent;
+            }
+            buttonElement.classList.add('loading');
+            buttonElement.disabled = true;
+            if (originalText) buttonElement.textContent = originalText;
+        } else {
+            buttonElement.classList.remove('loading');
+            buttonElement.disabled = false;
+            if (buttonElement.dataset.originalText) {
+                buttonElement.textContent = buttonElement.dataset.originalText;
+                delete buttonElement.dataset.originalText;
+            }
+        }
+    }
+    
+    setFormLoading(formElement, loading) {
+        if (loading) {
+            formElement.classList.add('form-loading');
+        } else {
+            formElement.classList.remove('form-loading');
+        }
+    }
     
     // ========================================================================
     // DATA LOADING
     // ========================================================================
     
     async loadQuestions() {
+        const refreshBtn = document.getElementById('refresh-btn');
+        if (refreshBtn) this.setButtonLoading(refreshBtn, true);
+        
         try {
             this.showLoading(true);
+            UTILS.showToast('Loading questions...', 'info');
             
             const data = await this.loadWithJsonp(`${CONFIG.API_URL}?action=getQuestions`);
             
             if (data.success) {
                 this.questions = data.questions || [];
-                this.hqTeam = data.team || this.hqTeam;
+                this.hqTeam = data.hqTeam || this.hqTeam;
                 this.cacheData(this.questions);
                 this.renderQuestions();
                 this.updateStats();
@@ -159,6 +193,7 @@ class OysterHQApp {
             UTILS.showToast('Failed to load questions. Showing cached data.', 'error');
         } finally {
             this.showLoading(false);
+            if (refreshBtn) this.setButtonLoading(refreshBtn, false);
         }
     }
     
@@ -457,24 +492,31 @@ class OysterHQApp {
     async submitResponse() {
         if (!this.currentQuestion) return;
         
+        const submitBtn = document.getElementById('submit-response-btn');
+        const responseForm = document.getElementById('response-section');
+        
+        this.setButtonLoading(submitBtn, true, 'Submitting...');
+        this.setFormLoading(responseForm, true);
+        UTILS.showToast('Submitting response...', 'info');
+        
         const responseText = document.getElementById('response-text').value.trim();
         
         if (!responseText) {
             UTILS.showToast('Please enter a response', 'error');
+            this.setButtonLoading(submitBtn, false);
+            this.setFormLoading(responseForm, false);
             return;
         }
         
         try {
             const response = await fetch(CONFIG.API_URL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({
                     action: 'submitResponse',
                     questionId: this.currentQuestion.id,
                     response: responseText,
-                    responderName: this.getCurrentUser() // Add current user
+                    responderName: this.getCurrentUser()
                 })
             });
             
@@ -491,30 +533,36 @@ class OysterHQApp {
         } catch (error) {
             console.error('Error submitting response:', error);
             UTILS.showToast('Failed to submit response', 'error');
+        } finally {
+            this.setButtonLoading(submitBtn, false);
+            this.setFormLoading(responseForm, false);
         }
     }
     
     async addThreadMessage() {
         if (!this.currentQuestion) return;
         
+        const addBtn = document.getElementById('add-thread-btn');
+        this.setButtonLoading(addBtn, true, 'Sending...');
+        UTILS.showToast('Sending message...', 'info');
+        
         const messageText = document.getElementById('thread-message').value.trim();
         
         if (!messageText) {
             UTILS.showToast('Please enter a message', 'error');
+            this.setButtonLoading(addBtn, false);
             return;
         }
         
         try {
             const response = await fetch(CONFIG.API_URL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({
                     action: 'addThread',
                     questionId: this.currentQuestion.id,
                     message: messageText,
-                    hqMemberName: this.getCurrentUser() // Add current user
+                    hqMemberName: this.getCurrentUser()
                 })
             });
             
@@ -535,6 +583,8 @@ class OysterHQApp {
         } catch (error) {
             console.error('Error adding thread message:', error);
             UTILS.showToast('Failed to add message', 'error');
+        } finally {
+            this.setButtonLoading(addBtn, false);
         }
     }
     
